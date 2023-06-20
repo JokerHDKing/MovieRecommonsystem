@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>电影首页</title>
+    <meta charset="UTF-8">
+
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+
+        .container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .navbar li {
+            margin-right: 10px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px;
+        }
+
+        .navbar a:hover {
+            color: #007bff;
+        }
+
+        .movie-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .movie-list li {
+            width: auto;
+            margin: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .movie-list li img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .movie-list li h3 {
+            margin: 0;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <nav class="navbar">
+        <div>
+
+            {% if userid > 0 %}
+            <div class="login_">
+                <p>您已登录，欢迎您：<a href="http://127.0.0.1:2020/rec">{{ username }}</a>
+                    <button class="btn btn-default"><a href="http://127.0.0.1:2020/login">注销登录</a></button>
+                </p>
+            </div>
+
+            {% else %}
+            <p>您还没有登录，请
+                <button class="btn btn-default"><a href="http://127.0.0.1:2020/login">登录</a></button>
+                或者
+                <button class="btn btn-default"><a href="http://127.0.0.1:2020/register">注册</a></button>
+            </p>
+            {% endif %}
+            <div>
+
+                <table>
+                    {% if userid >0 %}
+                    <td>
+                        <form action="/rec" method="POST">
+                            <input type="hidden" name="userid" value={{ userid }}>
+                            <button type="submit" class="btn btn-default">推荐</button>
+                        </form>
+                    </td>
+                    {% endif %}
+
+
+                </table>
+
+
+            </div>
+
+
+        </div>
+        <div>
+            <h2>电影首页</h2>
+            <ul class="movie-list">
+                {% for items in movie_info %}
+                <li style="width: 230px; height: 425px;">
+<!--                    {{ items['url'] }}-->
+                    <a href=" {{ items['url'] }}" onClick="movieClicked('{{ items['movid'] }}')">
+                        <img src="../static/poster/{{ items['movid'] }}.jpg" alt="Movie 1"
+                             style="width: 200px; height: 300px;">
+                        <h3 style="font-size: 20px;">{{ items["title"] }}</h3>
+                        <p>{{items["year"]}}</p>
+                        <p>{{items["cat"]}}</p>
+                    </a>
+                </li>
+                {% endfor %}
+                <br/>
+                {% if userid > 0 %}
+            </ul>
+        </div>
+        <div><h2>为你推荐</h2></div>
+        <div>
+
+
+            <ul class="movie-list">
+                {% for movie_id, movie_info in rec.items() %}
+                <li style="width: 230px; height: 425px;">
+                    <a href="{{movie_info['movie_info'][3]}}" onClick="movieClicked('{{ movie_info['movie_info'][0] }}')">
+                        <img src="../static/poster/{{ movie_info['movie_info'][0] }}.jpg" alt="Movie 1"
+                             style="width: 200px; height: 300px;">
+                        <h3 style="font-size: 20px;">{{ movie_info['movie_info'][1] }}</h3>
+                        <p>{{movie_info['movie_info'][4]}} </p>
+                        <p>{{ movie_info['movie_info'][2] }}</p>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        {% endif %}
+
+    </nav>
+</div>
+<script>
+        var userId = '{{ userid }}';
+        console.log(userId)
+
+    // 判断用户是否登录的全局变量
+    function movieClicked(movieId) {
+
+        console.log('点击的电影ID：' + movieId);
+
+            // 发送 POST 请求到后端
+            $.ajax({
+                url: '/save',  // 后端路由地址
+                type: 'POST',
+                data: {movieId: movieId,usrid:userId},  // 电影ID作为数据发送
+                success: function(response) {
+                    // 请求成功的处理逻辑
+                    console.log('请求成功');
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    // 请求失败的处理逻辑
+                    console.log('请求失败');
+                    console.log(error);
+                }
+            });
+    }
+</script>
+
+</body>
+
+</html>
